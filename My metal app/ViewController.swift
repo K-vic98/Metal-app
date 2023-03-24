@@ -73,7 +73,6 @@ private extension ViewController {
             )
 
             renderer = Renderer(
-                device: device,
                 commandQueue: commandQueue,
                 mesh: mesh,
                 pipelineState: pipelineState
