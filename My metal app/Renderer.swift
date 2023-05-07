@@ -12,18 +12,17 @@ final class Renderer: NSObject {
     // MARK: - Properties
 
     private let commandQueue: MTLCommandQueue
-    private let mesh: MTKMesh
-    private let vertexBuffer: MTLBuffer
     private let pipelineState: MTLRenderPipelineState
+    private let quad: Quad?
 
     // MARK: - Initialization
 
-    init(commandQueue: MTLCommandQueue, mesh: MTKMesh, pipelineState: MTLRenderPipelineState) {
+    init(device: MTLDevice, commandQueue: MTLCommandQueue, pipelineState: MTLRenderPipelineState) {
 
         self.commandQueue = commandQueue
-        self.mesh = mesh
-        self.vertexBuffer = mesh.vertexBuffers[0].buffer
         self.pipelineState = pipelineState
+
+        quad = Quad(device: device)
 
         super.init()
     }
@@ -39,6 +38,10 @@ extension Renderer: MTKViewDelegate {
 
     func draw(in view: MTKView) {
 
+        guard let quad = quad else {
+            return
+        }
+
         guard
             let commandBuffer = commandQueue.makeCommandBuffer(),
             let descriptor = view.currentRenderPassDescriptor,
@@ -47,15 +50,26 @@ extension Renderer: MTKViewDelegate {
         }
 
         renderEncoder.setRenderPipelineState(pipelineState)
-        renderEncoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
-        for submesh in mesh.submeshes {
-          renderEncoder.drawIndexedPrimitives(
+
+        renderEncoder.setVertexBuffer(
+            quad.vertexBuffer,
+            offset: 0,
+            index: 0
+        )
+
+        renderEncoder.setVertexBuffer(
+            quad.colorBuffer,
+            offset: 0,
+            index: 1
+        )
+
+        renderEncoder.drawIndexedPrimitives(
             type: .triangle,
-            indexCount: submesh.indexCount,
-            indexType: submesh.indexType,
-            indexBuffer: submesh.indexBuffer.buffer,
-            indexBufferOffset: submesh.indexBuffer.offset)
-        }
+            indexCount: quad.indices.count,
+            indexType: .uint16,
+            indexBuffer: quad.indexBuffer,
+            indexBufferOffset: 0
+        )
 
         renderEncoder.endEncoding()
 

@@ -42,41 +42,40 @@ private extension ViewController {
 
         let guide = view.safeAreaLayoutGuide
         NSLayoutConstraint.activate([
-            metalView.leadingAnchor.constraint(equalTo: guide.leadingAnchor),
-            metalView.trailingAnchor.constraint(equalTo: guide.trailingAnchor),
-            metalView.topAnchor.constraint(equalTo: guide.topAnchor),
-            metalView.bottomAnchor.constraint(equalTo: guide.bottomAnchor)
+            metalView.heightAnchor.constraint(equalToConstant: 300),
+            metalView.widthAnchor.constraint(equalToConstant: 300),
+            metalView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            metalView.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
     }
 
     func setup() {
-        view.backgroundColor = .systemYellow
+        view.backgroundColor = .systemIndigo
 
         metalView.clipsToBounds = true
         metalView.layer.cornerRadius = 12
         metalView.layer.borderWidth = 4
         metalView.layer.borderColor = UIColor.black.cgColor
-        metalView.clearColor = MTLClearColor(red: 1, green: 1, blue: 0.8, alpha: 1)
     }
 
     func setupMetalView() {
         let metalHandler = MTLHandler()
 
         do {
+
             let device = try metalHandler.makeDevice()
             let commandQueue = try metalHandler.makeCommandQueue(device: device)
-            let mesh = try metalHandler.makeBoxMesh(device: device)
             let pipelineState = try metalHandler.makePipelineState(
                 device: device,
-                metalView: metalView,
-                mesh: mesh
+                metalView: metalView
             )
 
             renderer = Renderer(
+                device: device,
                 commandQueue: commandQueue,
-                mesh: mesh,
                 pipelineState: pipelineState
             )
+
             metalView.device = device
             metalView.delegate = renderer
         } catch {

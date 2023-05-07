@@ -10,14 +10,22 @@ using namespace metal;
 
 struct VertexIn {
     float4 position [[attribute(0)]];
+    float4 color [[attribute(1)]];
 };
 
-vertex float4 vertex_main(const VertexIn vertexIn [[stage_in]]) {
-    float4 position = vertexIn.position;
-    position.y -= 1.0;
-    return vertexIn.position;
+struct VertexOut {
+    float4 position [[position]];
+    float4 color;
+};
+
+vertex VertexOut vertex_main(VertexIn in [[stage_in]]) {
+    VertexOut out {
+        .position = in.position,
+        .color = in.color
+    };
+    return out;
 }
 
-fragment float4 fragment_main() {
-  return float4(1, 0, 0, 1);
+fragment float4 fragment_main(VertexOut in [[stage_in]]) {
+    return in.color;
 }
